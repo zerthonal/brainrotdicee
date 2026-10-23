@@ -70,7 +70,8 @@ function split(coinDrops: number[], coinShare: number, rots: Brainrot[]): CaseEn
   ]
 }
 
-const art = (name: string) => `/img/cases/${name}.webp`
+// Case covers: Steal a Brainrot styled chests, each with a star brainrot of the case on top.
+const art = (name: string) => `/img/cases/${name}-v2.webp`
 
 // Paid case price sits between the cheapest drop and the average drop value, then
 // balance() tunes weights to 92% RTP — so rarer brainrots inside are always rarer to hit.
@@ -89,6 +90,9 @@ const CRYSTAL = ["nachorilla", "pretzo-robo", "grabatron", "la-fuse-machine", "b
 const CHRISTMAS = ["los-candies", "money-money-reindeer", "la-jolly-grande", "festive-67", "ginger-gerat", "la-ginger-sekolah", "reinito-sleighito", "cooki-and-milki", "chicleteira-noelteira", "chimnino", "yetimatic"]
 const SPRING = ["churrito-bunnito", "hopilikalika-hopilikalako", "la-easter-grande", "quackini-snackini", "boppin-bunny", "bunny-and-eggy", "hydra-bunny", "lovin-rose", "la-romantic-grande", "rosetti-tualetti", "love-love-bear", "rosey-and-teddy", "chicleteira-cupideira", "gold-gold-gold", "cloverat-clapat", "fortunu-and-cashuru"]
 const DRAGON = ["dragon-cannelloni", "hydra-dragon-cannelloni", "dragon-skeletonini", "arcadragon", "dragon-aquanini", "los-dragons", "phoenix", "lavamanta", "cerberus", "griffin", "chillin-chili", "los-chillis"]
+const FOOD = ["burguro-and-fryuro", "pancake-and-syrup", "popcuru-and-fizzuru", "la-breakfast-combinasion", "los-tacoritas", "ketchuru-and-musturu", "pizza-and-ranch", "la-food-combinasion", "fragrama-and-chocrama", "spaghetti-tualetti", "los-spaghettis", "quackini-snackini", "nacho-spyder", "la-taco-combinasion", "cooki-and-milki", "chipso-and-queso", "nachorilla", "tacoturbo-tacorito", "pretzo-robo"]
+// Every "Los ..." squad brainrot.
+const byLos = () => BRAINROTS.filter((b) => b.name.startsWith("Los "))
 const SUMMER = ["capitano-gullini", "los-fruits", "sand-sand-sand", "coco-and-mango", "venuspino", "dragon-aquanini", "honey-honey-bear", "pop-pop-petalini", "queen-bee", "s-more-serat", "bumbatron", "orchidox", "la-summer-grande"]
 
 export const CASES: CaseDef[] = [
@@ -100,7 +104,7 @@ export const CASES: CaseDef[] = [
     price: 0,
     cooldownHours: 24,
     accent: "#22c55e",
-    cover: "/img/cases/free.webp",
+    cover: art("free"),
     entries: split([5, 10, 15, 25, 40], 0.97, byTier("rare")),
   },
   {
@@ -111,11 +115,11 @@ export const CASES: CaseDef[] = [
     price: 0,
     cooldownHours: 12,
     accent: "#f472b6",
-    cover: "/img/cases/referral.webp",
+    cover: art("referral"),
     entries: split([30, 60, 100, 150, 200], 0.75, byTier("rare", "epic")),
   },
-  paid("secret", "Секретный", "Обычные Secret брейнроты", "#38bdf8", "/img/cases/secret.webp", byTier("rare")),
-  paid("lucky", "Лаки Кэтч", "Secret + редкие", "#a855f7", "/img/cases/lucky.webp", byTier("rare", "epic")),
+  paid("secret", "Секретный", "Обычные Secret брейнроты", "#38bdf8", art("secret"), byTier("rare")),
+  paid("lucky", "Лаки Кэтч", "Secret + редкие", "#a855f7", art("lucky"), byTier("rare", "epic")),
   paid("sea", "Морская братва", "Акулы, рыбы и капитаны", "#0ea5e9", art("sea"), byIds(SEA)),
   paid("halloween", "Хеллуин", "Тыквы, скелеты и призраки", "#f97316", art("halloween"), byIds(HALLOWEEN)),
   paid("christmas", "Рождество", "Новогодние брейнроты", "#ef4444", art("christmas"), byIds(CHRISTMAS)),
@@ -125,6 +129,8 @@ export const CASES: CaseDef[] = [
   paid("admin", "Админ Абуз", "Только с Admin Abuse ивентов", "#dc2626", art("admin"), byCats(["Admin Abuse"])),
   paid("dragon", "Драгон", "Лава, огонь и драконы", "#f97316", art("dragon"), byIds(DRAGON)),
   paid("og", "OG Легенды", "Эксклюзивы и OG", "#f472b6", art("og"), byTier("mythic", "og")),
+  paid("food", "Фуд-корт", "Бургеры, тако и спагетти", "#fb923c", art("food"), byIds(FOOD)),
+  paid("los", "Лос Банда", "Вся семейка Los", "#2dd4bf", art("los"), byLos()),
 ]
 
 // ---- Owner overrides: custom chances and extra brainrots per case ----
