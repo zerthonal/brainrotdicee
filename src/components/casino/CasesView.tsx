@@ -102,16 +102,7 @@ function CaseTile({ c, onOpen }: { c: CaseDef; onOpen: () => void }) {
   const small = c.kind !== "paid"
   const gifted = freeCases[c.id] ?? 0
   const meta = useCaseMeta(c)
-  // Two rarest brainrots peek out from behind the cover, like a Steal a Brainrot pedestal.
-  const peek = useMemo(
-    () =>
-      sortedEntries(c)
-        .filter((e) => e.drop.kind === "brainrot")
-        .slice(0, 2)
-        .map((e) => (e.drop.kind === "brainrot" ? BRAINROT_BY_ID[e.drop.id] : null))
-        .filter(Boolean),
-    [c],
-  )
+  const isNew = NEW_CASES.has(c.id)
   return (
     <button
       type="button"
@@ -126,32 +117,24 @@ function CaseTile({ c, onOpen }: { c: CaseDef; onOpen: () => void }) {
       <span className="bd-halftone" />
       <span className="bd-case-shine" />
       <div className="relative z-[2] flex w-full items-start justify-between gap-1">
-        {small ? <span className="bd-case-chip">{KIND_BADGE[c.kind] ?? "BONUS"}</span> : <span />}
+        {small ? (
+          <span className="bd-case-chip">{KIND_BADGE[c.kind] ?? "BONUS"}</span>
+        ) : isNew ? (
+          <span className="bd-case-new">NEW</span>
+        ) : (
+          <span />
+        )}
         {gifted > 0 && <span className="bd-case-gift">🎁×{gifted}</span>}
       </div>
-      <div className={cn("relative mt-1 grid w-full place-items-center", small ? "h-[72px]" : "h-32")}>
+      <div className={cn("relative -mt-1 grid w-full place-items-center", small ? "h-[84px]" : "h-36")}>
         <span className="bd-case-halo" />
-        {!small &&
-          peek.map((b, i) =>
-            b ? (
-              <img
-                key={b.id}
-                src={cdnImage(b.image, 120)}
-                alt=""
-                loading="lazy"
-                className={cn(
-                  "absolute bottom-1 z-[1] size-14 object-contain drop-shadow-[0_4px_6px_rgba(0,0,0,.7)] transition-transform duration-300",
-                  i === 0 ? "-left-1 -rotate-12 group-hover:-translate-x-1" : "-right-1 rotate-12 group-hover:translate-x-1",
-                )}
-              />
-            ) : null,
-          )}
+        {/* Cover already shows the case's star brainrot on a Steal a Brainrot style chest. */}
         <img
           src={cdnImage(c.cover, small ? 160 : 260)}
           alt=""
           loading="lazy"
           decoding="async"
-          className={cn("bd-sticker bd-case-art relative z-[2] object-contain", small ? "size-[72px]" : "size-32")}
+          className={cn("bd-case-cover bd-case-art relative z-[2] object-contain", small ? "size-[84px]" : "size-36")}
         />
         <span className="bd-pedestal" />
       </div>
