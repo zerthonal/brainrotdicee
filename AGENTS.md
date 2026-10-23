@@ -26,3 +26,5 @@
 - Sounds are synthesized in `src/lib/sound.ts` and fired from `notify()`/medium `haptic()`; light taps stay silent. Why: owner asked for event sounds but no click sounds.
 - Upgrader odds (max chance, house edge) and quick-pick presets live in src/data/upgrader.ts as pure functions. Why: one place for the rules, covered by tests.
 - The free case requires a Telegram channel subscription verified server-side via Bot API getChatMember (src/lib/subscription.functions.ts). Why: client-side checks are trivially bypassed; the bot must be a channel admin.
+- Case covers are `/img/cases/<id>-v2.webp` chest art with the case's star brainrot baked in and its own white sticker outline, so tiles must not add the `.bd-sticker` outline or peek extra brainrots. Why: covers were redrawn as one Steal a Brainrot style set.
+- The beginner tour (src/components/casino/Onboarding.tsx) opens once per device (localStorage `brainrotdice:tour-done`) and is reopened from the corner menu and hero. Why: newcomers see it without a backend change; existing `brainrotdrop:*` storage keys stay so old saves load.
