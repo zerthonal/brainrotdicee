@@ -24,7 +24,7 @@ import { ProfileView } from '@/components/casino/ProfileView'
 import { BattlePassView } from '@/components/casino/BattlePassView'
 import { itemValue } from '@/lib/store'
 import { LEVELS, QUESTS, canClaimLevel, levelFromXp, questProgress } from '@/data/battlepass'
-import { BrainrotImg, Coin, CoinAmount, IncomeTag, cdnImage } from '@/components/casino/ui'
+import { BrainrotImg, Coin, CoinAmount, cdnImage } from '@/components/casino/ui'
 
 export const Route = createFileRoute('/')({
   head: () => ({
