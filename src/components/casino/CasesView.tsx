@@ -94,6 +94,9 @@ function useCaseMeta(c: CaseDef) {
   }, [c])
 }
 
+// Recently added cases get a NEW badge on their tile.
+const NEW_CASES = new Set(["food", "los"])
+
 function CaseTile({ c, onOpen }: { c: CaseDef; onOpen: () => void }) {
   const { caseReadyAt, freeCases } = useStore()
   const now = useNow()
@@ -293,7 +296,7 @@ function CaseModal({ c, onClose }: { c: CaseDef; onClose: () => void }) {
         <div className="bd-case-hero" style={{ ["--case" as string]: c.accent }}>
           <span className="bd-case-rays" />
           <span className="bd-halftone" />
-          <img src={cdnImage(c.cover, 260)} alt="" className="bd-sticker bd-float relative z-[2] size-24 shrink-0 object-contain" />
+          <img src={cdnImage(c.cover, 260)} alt="" className="bd-case-cover bd-float relative z-[2] size-28 shrink-0 object-contain" />
           <div className="relative z-[2] min-w-0 flex-1">
             <div className="bd-case-title text-xl">{c.name}</div>
             <div className="mt-1 text-xs text-white/65">{c.subtitle}</div>
@@ -486,7 +489,7 @@ export function InviteButton({ userId }: { userId: number }) {
       className="bd-btn flex w-full items-center justify-center gap-2 py-2.5 text-sm"
       onClick={() => {
         haptic()
-        openShare(link, "🧠 Залетай в BrainrotDrop! Бесплатные кейсы с брейнротами из Steal a Brainrot, апгрейдер и Crash. Забирай бонус по моей ссылке 👇")
+        openShare(link, "🧠 Залетай в BrainrotDice! Бесплатные кейсы с брейнротами из Steal a Brainrot, апгрейдер и Crash. Забирай бонус по моей ссылке 👇")
       }}
     >
       <Share2 className="size-4" /> Пригласить друга
