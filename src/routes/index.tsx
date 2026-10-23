@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
-import { Box, ChevronRight, Crown, Dices, Ellipsis, EyeOff, Megaphone, Plus, Rocket, Settings, Ticket, TrendingUp, User, X } from 'lucide-react'
+import { Box, ChevronRight, Crown, Dices, Ellipsis, EyeOff, GraduationCap, Megaphone, Plus, Rocket, Settings, Ticket, TrendingUp, User, X } from 'lucide-react'
+import logo from '@/assets/brainrotdice-logo.webp'
+import meowlGuide from '@/assets/meowl-guide.webp'
+import { Onboarding } from '@/components/casino/Onboarding'
 import { OwnerView } from '@/components/casino/OwnerView'
 import { isOwner } from '@/lib/tg-auth'
 import { setStreamer, useLive } from '@/lib/live'
@@ -26,9 +29,9 @@ import { BrainrotImg, Coin, CoinAmount, IncomeTag, cdnImage } from '@/components
 export const Route = createFileRoute('/')({
   head: () => ({
     meta: [
-      { title: 'BrainrotDrop — кейсы с брейнротами' },
+      { title: 'BrainrotDice — кейсы с брейнротами' },
       { name: 'description', content: 'Telegram Mini App: открывай тематические кейсы и выбивай брейнротов из Steal a Brainrot' },
-      { property: 'og:title', content: 'BrainrotDrop — кейсы с брейнротами' },
+      { property: 'og:title', content: 'BrainrotDice — кейсы с брейнротами' },
       { property: 'og:description', content: 'Хеллуин, Кристальный, Морская братва и другие кейсы с брейнротами из Steal a Brainrot' },
       { property: 'og:type', content: 'website' },
       { name: 'twitter:card', content: 'summary_large_image' },
@@ -38,6 +41,8 @@ export const Route = createFileRoute('/')({
 })
 
 type TabId = 'cases' | 'battlepass' | 'upgrade' | 'dice' | 'crash' | 'profile' | 'owner'
+
+const TOUR_KEY = 'brainrotdice:tour-done'
 
 const TABS: { id: TabId; label: string; icon: typeof Box }[] = [
   { id: 'cases', label: 'Кейсы', icon: Box },
@@ -73,6 +78,23 @@ function Shell() {
   const tabs = owner ? [...TABS, { id: 'owner' as TabId, label: 'Разраб', icon: Crown }] : TABS
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [tourOpen, setTourOpen] = useState(false)
+  // Beginner tour opens once on the first visit; reopen it from the menu or hero.
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem(TOUR_KEY)) setTourOpen(true)
+    } catch {
+      /* ignore */
+    }
+  }, [])
+  const closeTour = () => {
+    setTourOpen(false)
+    try {
+      localStorage.setItem(TOUR_KEY, '1')
+    } catch {
+      /* ignore */
+    }
+  }
   const [tab, setTab] = useState<TabId>('cases')
   // Game views stay mounted so a running Crash round or upgrade isn't lost on tab switch.
   const [visited, setVisited] = useState<Set<TabId>>(() => new Set(['cases']))
@@ -96,7 +118,7 @@ function Shell() {
       <BestDrop24h />
       <LiveFeed />
       <main className="mx-auto max-w-xl px-4 pt-4">
-        {tab === 'cases' && <Hero onPlay={() => go('upgrade')} />}
+        {tab === 'cases' && <Hero onPlay={() => go('upgrade')} onLearn={() => { haptic(); setTourOpen(true) }} />}
         {tab === 'cases' && <BattlePassPromo onOpen={() => go('battlepass')} />}
         {tabs.map(({ id }) =>
           visited.has(id) ? (
@@ -123,6 +145,19 @@ function Shell() {
             setMenuOpen(false)
             setSettingsOpen(true)
           }}
+          onTour={() => {
+            setMenuOpen(false)
+            setTourOpen(true)
+          }}
+        />
+      )}
+      {tourOpen && (
+        <Onboarding
+          onClose={closeTour}
+          onGo={(t) => {
+            closeTour()
+            go(t)
+          }}
         />
       )}
       {settingsOpen && <SettingsSheet onClose={() => setSettingsOpen(false)} />}
@@ -138,7 +173,7 @@ function MaintenanceScreen({ text }: { text: string | null }) {
           <Wrench className="size-8" />
         </div>
         <h1 className="mt-5 font-heading text-2xl font-extrabold">Технический перерыв</h1>
-        <p className="mt-2 text-sm text-white/60">{text || 'Мы обновляем BrainrotDrop. Скоро вернёмся — твой баланс и инвентарь в сохранности.'}</p>
+        <p className="mt-2 text-sm text-white/60">{text || 'Мы обновляем BrainrotDice. Скоро вернёмся — твой баланс и инвентарь в сохранности.'}</p>
       </div>
     </div>
   )
@@ -228,8 +263,11 @@ function Header({ onDeposit, onMenu }: { onDeposit: () => void; onMenu: () => vo
           <button type="button" onClick={onMenu} className="bd-dots" aria-label="Открыть меню">
             <Ellipsis className="size-6" strokeWidth={3.5} />
           </button>
-          <div className="font-heading text-[16px] font-extrabold leading-none tracking-tight">
-            Brainrot<span className="text-[var(--bd-lime)]">Drop</span>
+          <div className="flex items-center gap-1.5">
+            <img src={logo} alt="" className="bd-logo" width={42} height={42} />
+            <div className="bd-wordmark">
+              Brainrot<span>Dice</span>
+            </div>
           </div>
         </div>
         <div className="flex items-center gap-1.5 rounded-xl border border-white/8 bg-black/35 p-1 pl-3">
@@ -249,12 +287,14 @@ function CornerMenu({
   onChange,
   onClose,
   onSettings,
+  onTour,
 }: {
   tabs: typeof TABS
   tab: TabId
   onChange: (t: TabId) => void
   onClose: () => void
   onSettings: () => void
+  onTour: () => void
 }) {
   const { user, balance, inventory } = useStore()
   const invValue = inventory.reduce((s, i) => s + itemValue(i), 0)
@@ -303,6 +343,10 @@ function CornerMenu({
               {label}
             </button>
           ))}
+          <button type="button" className="bd-menu-item" onClick={onTour}>
+            <GraduationCap className="size-5" />
+            Обучение
+          </button>
           <button type="button" className="bd-menu-item" onClick={onSettings}>
             <Settings className="size-5" />
             Настройки
@@ -419,38 +463,41 @@ function LiveFeed() {
   )
 }
 
-function Hero({ onPlay }: { onPlay: () => void }) {
+function Hero({ onPlay, onLearn }: { onPlay: () => void; onLearn: () => void }) {
   const hero = BRAINROT_BY_ID['strawberry-elephant']
-  const side = BRAINROT_BY_ID['la-supreme-combinasion']
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 p-5" style={{ background: 'linear-gradient(135deg,#3b0f5c 0%,#1a0b33 55%,#0f2a0a 130%)' }}>
-      <div className="bd-rays pointer-events-none absolute -right-24 -top-24 size-80 opacity-40" />
-      <div className="relative z-10 max-w-[58%]">
-        <div className="inline-flex items-center gap-1 rounded-full bg-black/35 px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-wider text-[var(--bd-lime)]">
-          Steal a Brainrot · Telegram
-        </div>
-        <h1 className="mt-3 font-heading text-[26px] font-extrabold leading-[1.05]">
-          Выбивай <span className="text-[#ff7ad9]">OG</span> брейнротов
+    <div className="bd-hero">
+      <div className="bd-rays pointer-events-none absolute -right-24 -top-24 size-80 opacity-30" />
+      <div className="relative z-10 max-w-[60%]">
+        <div className="bd-hero-chip">Steal a Brainrot · кейсы</div>
+        <h1 className="mt-3 font-heading text-[27px] font-extrabold leading-[1.02]">
+          Кидай кубик, лови <span className="bd-hero-accent">OG</span>
         </h1>
-        <p className="mt-2 text-xs text-white/65">Кейсы, апгрейдер, Crash и Dice. Депозит и вывод прямо в Roblox через админа.</p>
-        <button type="button" onClick={onPlay} className="bd-btn mt-4 px-5 py-2.5 text-sm">
-          Апгрейднуть
-        </button>
-      </div>
-      <div className="pointer-events-none absolute -right-2 bottom-2 flex flex-col items-end">
-        <img
-          src={cdnImage(hero.image, 360)}
-          alt={hero.name}
-          fetchPriority="high"
-          className="bd-float size-40 object-contain drop-shadow-[0_12px_30px_rgba(255,79,216,.55)]"
-        />
-        <div className="mr-3 -mt-2 flex items-center gap-1">
-          <IncomeTag perSec={hero.incomePerSec} />
+        <p className="mt-2 text-xs leading-relaxed text-white/65">Кейсы, апгрейдер, Crash и Dice. Депозит и вывод прямо в Roblox через админа.</p>
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <button type="button" onClick={onPlay} className="bd-btn px-5 py-2.5 text-sm">
+            Апгрейднуть
+          </button>
+          <button type="button" onClick={onLearn} className="bd-btn-learn">
+            <GraduationCap className="size-4" /> Как играть
+          </button>
         </div>
       </div>
-      <img src={cdnImage(side.image, 140)} alt="" className="pointer-events-none absolute bottom-3 right-36 size-14 rotate-[-8deg] object-contain opacity-90" />
-      <Coin size={30} className="bd-float absolute right-6 top-6" />
-      <Coin size={18} className="absolute right-44 top-10 opacity-80" />
+      <div className="pointer-events-none absolute -right-3 bottom-0 flex items-end">
+        <img
+          src={cdnImage(hero.image, 200)}
+          alt=""
+          className="relative z-[1] -mr-8 mb-3 size-20 rotate-[-10deg] object-contain opacity-95 drop-shadow-[0_8px_14px_rgba(0,0,0,.6)]"
+        />
+        <img
+          src={meowlGuide}
+          alt="Meowl"
+          fetchPriority="high"
+          className="bd-float relative z-[2] h-44 w-auto object-contain drop-shadow-[0_14px_24px_rgba(182,255,59,.35)]"
+        />
+      </div>
+      <Coin size={28} className="bd-float absolute right-5 top-5" />
+      <Coin size={16} className="absolute right-40 top-8 opacity-80" />
     </div>
   )
 }
@@ -458,7 +505,7 @@ function Hero({ onPlay }: { onPlay: () => void }) {
 function Footer() {
   return (
     <p className="mt-10 text-center text-[10px] leading-relaxed text-white/30">
-      BrainrotDrop — фан-проект, не связан с Roblox Corporation. Монеты — внутриигровая валюта сайта и не выводятся в деньги.
+      BrainrotDice — фан-проект, не связан с Roblox Corporation. Монеты — внутриигровая валюта сайта и не выводятся в деньги.
       Данные и изображения персонажей — Steal a Brainrot Wiki (Fandom). 18+
     </p>
   )
